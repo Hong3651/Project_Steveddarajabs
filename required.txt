@@ -1,6 +1,6 @@
 ## 🧩 Environment
 
-- **Python**: 3.10.9
+- **Python**: 3.13.7 / 3.10.9
 - **PyTorch**: 2.9.1+cpu  
 - **TorchVision**: 0.24.1+cpu  
 - **TorchAudio**: 2.9.1+cpu  

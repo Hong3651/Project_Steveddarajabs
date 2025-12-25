@@ -284,6 +284,6 @@
 # 프로젝트 상세 개요
 
  - 기간 : 2025년 11월 17일 ~ 2025년 12월 17일
- - Languages : Python(ver.3.10.0)
+ - Languages : Python(ver.3.13.7)
  - Cloud : Google Cloud Platform
  - 주요 라이브러리 버전 : [required.txt](required.txt) 참조
