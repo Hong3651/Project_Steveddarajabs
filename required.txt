@@ -1,0 +1,19 @@
+## 🧩 Environment
+
+- **Python**: 3.13.7 / 3.10.9
+- **PyTorch**: 2.9.1+cpu  
+- **TorchVision**: 0.24.1+cpu  
+- **TorchAudio**: 2.9.1+cpu  
+
+- **NumPy**: 2.3.4  
+- **pandas**: 2.3.3  
+- **scikit-learn**: 1.7.2  
+
+- **OpenCV (opencv-python)**: 4.12.0  
+- **MediaPipe**: 0.10.31  
+
+- **librosa**: 0.11.0  
+- **Matplotlib**: 3.10.7  
+
+- **Transformers**: 4.57.3  
+- **whisper**: 20250625
