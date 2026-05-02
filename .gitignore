@@ -3,7 +3,7 @@
 *.pkl
 *.mp4
 *.wav
+*.pptx
+*.ppt
 __pycache__/
 .ipynb_checkpoints/
-"*.pptx" 
-"*.ppt" 
