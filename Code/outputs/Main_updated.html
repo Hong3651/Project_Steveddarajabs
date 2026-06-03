@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스티브 따라잡스: 최고의 발표를 위한 AI 컨설턴트</title>
+    <style>
+        /* 폰트 및 기본 설정: Apple 스타일 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 메인 컨테이너 */
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .header-image {
+            width: 400px; 
+            height: auto;
+            margin-bottom: 0px; 
+            display: block; 
+            margin-left: auto;
+            margin-right: auto; 
+            opacity: 0.85; 
+        }
+
+        /* ----- 카피라이트 스타일 ----- */
+        p.headline {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            line-height: 1.4;
+            letter-spacing: -0.8px;
+        }
+        
+        /* 파일 입력 필드 숨기기 */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* ----- 파일 선택 버튼 (윤곽선 스타일) ----- */
+        .custom-file-upload {
+            border: 1px solid #007aff; 
+            background-color: transparent; 
+            color: #007aff; 
+            padding: 12px 30px;
+            border-radius: 980px; 
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out; 
+            display: inline-block;
+            box-shadow: none; 
+            letter-spacing: -0.5px; 
+            margin-bottom: 20px;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #007aff; 
+            color: white; 
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+        }
+
+        /* ----- 메인 액션 버튼 (진한 배경 스타일) ----- */
+        #analyzeButton {
+            background-color: #007aff; 
+            color: white; 
+            border: none; 
+            padding: 14px 40px;
+            border-radius: 980px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            transition: opacity 0.2s;
+            margin-top: 30px;
+            display: block; 
+            margin-left: auto;
+            margin-right: auto;
+            display: none;
+        }
+
+        #analyzeButton:disabled {
+            opacity: 0.5; 
+            cursor: not-allowed;
+        }
+
+        #analyzeButton:hover:enabled {
+            opacity: 0.85; 
+        }
+
+        /* ----- 동영상 미리보기 스타일 ----- */
+        #videoPreviewContainer {
+            margin-top: 30px;
+            border-radius: 10px; 
+            overflow: hidden;
+            max-width: 100%;
+            display: none; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #videoPreview {
+            width: 100%;
+            height: 200px; 
+            display: block;
+            background-color: #eaeaec; 
+        }
+        
+        /* 파일 상태 및 로딩 표시 */
+        #fileStatus, #loadingStatus {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #6e6e73;
+        }
+        
+        #fileStatus.ready {
+            color: #007aff; 
+            font-weight: 600;
+        }
+        
+        /* ----- 로딩 바 스타일 ----- */
+        #loadingBarContainer {
+            width: 80%;
+            height: 6px;
+            background-color: #eaeaec; 
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px auto 10px;
+            display: none; 
+        }
+
+        #loadingBar {
+            height: 100%;
+            width: 0%;
+            background-color: #007aff; 
+            transition: width 0.3s linear;
+        }
+
+        /* 파일 크기 표시 */
+        .file-size {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- ★ 로고 이미지 경로 수정 필요 -->
+        <img src="static/logo.gif" alt="스티브 따라잡스" class="header-image" onerror="this.style.display='none'">
+
+        <p class="headline">비로소 마주할 당신의 발표, 불러오기.</p>
+        
+        <div class="input-area">
+            <label for="videoFile" class="custom-file-upload">
+                발표 영상 선택 (.mp4)
+            </label>
+            <input 
+                type="file" 
+                id="videoFile" 
+                accept="video/*" 
+                onchange="handleVideoUpload(event)"
+            >
+            
+            <div id="fileStatus">저런, 아직 분석할 영상이 없네요.</div>
+            <div class="file-size" id="fileSize"></div>
+            
+            <div id="videoPreviewContainer">
+                <video id="videoPreview" controls muted></video>
+            </div>
+            
+            <button id="analyzeButton" onclick="startAnalysis()">
+                분석 시작
+            </button>
+            
+            <div id="loadingStatus" style="display: none;"></div>
+            <div id="loadingBarContainer">
+                <div id="loadingBar"></div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        const fileStatusElement = document.getElementById('fileStatus');
+        const fileSizeElement = document.getElementById('fileSize');
+        const videoPreviewContainer = document.getElementById('videoPreviewContainer');
+        const videoPreview = document.getElementById('videoPreview');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const loadingStatus = document.getElementById('loadingStatus');
+        const loadingBarContainer = document.getElementById('loadingBarContainer');
+        const loadingBar = document.getElementById('loadingBar');
+        let currentVideoFile = null;
+
+        // 파일 크기를 읽기 쉬운 형식으로 변환
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 영상 파일 선택을 처리하고 상태를 업데이트하는 JavaScript 함수
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            currentVideoFile = file;
+
+            // 로딩 UI 초기화
+            loadingStatus.style.display = 'none';
+            loadingBarContainer.style.display = 'none';
+            loadingBar.style.width = '0%';
+            loadingBar.style.backgroundColor = '#007aff';
+
+            if (file) {
+                // 파일이 선택된 경우
+                fileStatusElement.textContent = `업로드 준비 완료: ${file.name}`;
+                fileStatusElement.classList.add('ready');
+                fileSizeElement.textContent = `파일 크기: ${formatFileSize(file.size)}`;
+                analyzeButton.style.display = 'block';
+
+                // 썸네일/미리보기 표시
+                const videoURL = URL.createObjectURL(file);
+                videoPreview.src = videoURL;
+                videoPreviewContainer.style.display = 'block';
+
+            } else {
+                // 파일 선택이 취소된 경우
+                fileStatusElement.textContent = '마음이 바뀌셨나 보군요. 준비되시면 다시 불러주세요.';
+                fileStatusElement.classList.remove('ready');
+                fileSizeElement.textContent = '';
+                analyzeButton.style.display = 'none';
+
+                // 미리보기 숨김
+                videoPreviewContainer.style.display = 'none';
+                videoPreview.src = '';
+                currentVideoFile = null;
+            }
+        }
+
+        // ★★★ 분석 시작 함수 (실제 파일 업로드) ★★★
+        async function startAnalysis() {
+            if (!currentVideoFile) return;
+
+            // UI 전환 (분석 시작)
+            analyzeButton.style.display = 'none'; 
+            fileStatusElement.style.display = 'none';
+            fileSizeElement.style.display = 'none';
+            loadingStatus.style.display = 'block';
+            loadingBarContainer.style.display = 'block';
+            videoPreviewContainer.style.display = 'none'; 
+            
+            // ★ 실제 파일을 FormData로 전송
+            const formData = new FormData();
+            formData.append('video', currentVideoFile);
+
+            // Flask 서버 주소 (서버 실행 시 포트 5000)
+            const API_ENDPOINT = 'http://127.0.0.1:5000/analyze_presentation'; 
+            const RESULT_PAGE_URL = 'analysis_result.html'; 
+            
+            // 로딩 바 시뮬레이션 시작
+            let progressValue = 0;
+            const loadingInterval = setInterval(() => {
+                if (progressValue < 90) {
+                    progressValue += 0.5;
+                    loadingBar.style.width = progressValue + '%';
+                    loadingStatus.textContent = `🔬 AI가 발표를 분석하고 있습니다... ${Math.floor(progressValue)}%`;
+                }
+            }, 200);
+
+            try {
+                console.log('[Client] 영상 업로드 시작...');
+                
+                // ★ 서버에 파일 업로드 POST 요청
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    body: formData  // FormData로 파일 전송
+                });
+
+                clearInterval(loadingInterval);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('[Client] 서버 응답:', result);
+
+                    if (result.success) {
+                        // 성공
+                        loadingBar.style.width = '100%';
+                        loadingStatus.textContent = '🎉 분석 완료! 리포트 생성 중...';
+                        
+                        // ★ 서버에서 받은 영상 경로 저장
+                        const videoPath = result.video_path || currentVideoFile.name;
+                        localStorage.setItem('mainVideoPath', videoPath);
+                        localStorage.setItem('videoId', result.video_id || 'unknown');
+                        
+                        // 피드백 결과 저장
+                        localStorage.setItem('analysisFeedback', result.analysis_result);
+                        
+                        // 스티브 잡스 참고 영상 경로 (고정)
+                        localStorage.setItem('steveVideoPath', '/home/piai/ai_project/영상raw/steves.mp4'); 
+
+                        // 결과 페이지로 이동
+                        setTimeout(() => {
+                            window.location.href = RESULT_PAGE_URL; 
+                        }, 1000);
+
+                    } else {
+                        throw new Error(result.message || '분석 실패');
+                    }
+
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '서버 응답 오류');
+                }
+
+            } catch (error) {
+                clearInterval(loadingInterval);
+                loadingStatus.textContent = `🚨 오류 발생: ${error.message}`;
+                loadingBar.style.width = '0%';
+                loadingBar.style.backgroundColor = 'red';
+                console.error('API Call Failed:', error);
+                
+                // 재시도 버튼 표시
+                setTimeout(() => {
+                    fileStatusElement.style.display = 'block';
+                    fileStatusElement.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+                    fileStatusElement.classList.remove('ready');
+                    analyzeButton.style.display = 'block';
+                    analyzeButton.textContent = '다시 시도';
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>

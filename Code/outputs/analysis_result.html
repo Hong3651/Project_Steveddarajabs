@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스티브 따라잡스: 분석 결과</title>
+    <style>
+        /* 기본 스타일 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px; 
+            margin: 50px auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+            border-bottom: 1px solid #eaeaec;
+            padding-bottom: 15px;
+        }
+
+        /* ----- 피드백 항목 스타일 ----- */
+        .feedback-item {
+            display: flex; 
+            margin-bottom: 25px;
+            border-radius: 10px;
+            background-color: #fcfcfc;
+            border: 1px solid #eaeaec;
+            overflow: hidden; 
+        }
+        
+        /* 전체 피드백 내용 컨테이너 (좌우 분할의 부모) */
+        .feedback-content-area {
+            flex: 1; 
+            display: flex; 
+            padding: 20px;
+        }
+        
+        /* ⭐️ 좌측 섹션 (조정식 영상 + 발언 내용) */
+        .left-section {
+            flex: 1;
+            padding-right: 15px;
+            border-right: 1px solid #eaeaec;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        /* ⭐️ 우측 섹션 (스티브 잡스 영상 + 피드백 조언) */
+        .right-section {
+            flex: 1;
+            padding-left: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 영상 중앙 정렬 */
+        }
+
+        /* 메인 영상 (조정식) 영역 */
+        .main-video-area {
+            flex-shrink: 0; 
+            width: 100%; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0; 
+            background-color: transparent; 
+            border-right: none;
+        }
+        .main-video-area video {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+        .main-video-area p {
+            font-size: 13px;
+            color: #007aff; 
+            margin-top: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* 발언 내용 스타일 */
+        .feedback-text {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            border-top: 1px solid #eaeaec;
+        }
+        .feedback-text h3 {
+             color: #007aff;
+             margin-top: 0;
+        }
+
+        /* ----- 스티브 영상 컨테이너 (고정) ----- */
+        .steve-video-container {
+            width: 100%;
+            padding: 0;
+            background-color: transparent; /* 배경색 제거 */
+            border-radius: 8px;
+            margin-bottom: 15px; /* 조언과 분리 */
+        }
+        .steve-video-container video {
+            width: 100%;
+            height: auto; 
+            display: block;
+            border-radius: 6px;
+        }
+        .steve-video-container p {
+            color: #4b0082; 
+            text-align: center; 
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        /* 피드백 조언 (advice) 스타일 */
+        .feedback-advice {
+            width: 100%;
+            padding-top: 10px;
+        }
+        .feedback-advice h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #007aff;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        .advice-content {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #ffffff; 
+            border: 1px solid #eaeaec;
+            border-radius: 6px;
+        }
+        
+        /* 기타 스타일 유지 (스티브 토글 버튼 관련 스타일은 제거함) */
+        .feedback-header {
+            display: flex;
+            align-items: center; 
+            margin-bottom: 15px;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .feedback-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #007aff;
+            margin-right: 15px;
+            flex-shrink: 0; 
+            text-align: center;
+        }
+        .text-content strong {
+            color: #000000; 
+            font-weight: 800;
+            background-color: #f1f1fd;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>피드백, 그 이상의 피드백</h1>
+        
+        <p>가장 완벽한 발표, 그것은 아마도 '스티브 따라잡스'에서.</p>
+        
+        <div id="feedbackList">
+            <p>최고의 피드백을 작성하는 중...</p>
+        </div>
+        
+        <p style="margin-top: 30px;"><a href="Main.html" style="color: #007aff; text-decoration: none; font-weight: 500;">&larr; 다른 영상 분석하기</a></p>
+    </div>
+
+    <script>
+        // 전역 변수: 영상 경로
+        let MAIN_VIDEO_SOURCE = ''; 
+        let STEVE_VIDEO_SOURCE = '';
+
+        // ⭐️ 스티브 영상 토글 함수 (toggleSteveVideo)는 사용하지 않으므로 제거했습니다.
+        
+        // ⭐️ 핵심 함수 유지: 메인 영상 시점을 설정하고 재생/정지를 제어합니다.
+        function seekAndPlayMainVideo(videoElement, timeInSeconds, endTimeInSeconds, index) {
+            
+            // 1. 다른 영상이 재생될 때 이 영상이 정지되도록 리스너 설정
+            videoElement.addEventListener('play', function() {
+                // 영상이 재생되기 시작할 때, timeupdate 이벤트를 통해 정지 시간을 체크합니다.
+                this.timeCheckHandler = function() {
+                    // 현재 시간이 끝나는 시간(endTimeInSeconds)보다 크거나 같으면 정지
+                    if (this.currentTime >= endTimeInSeconds) {
+                        this.pause();
+                        // 정지 후 timeupdate 리스너를 제거하여 불필요한 체크를 막습니다.
+                        this.removeEventListener('timeupdate', this.timeCheckHandler); 
+                    }
+                };
+                this.addEventListener('timeupdate', this.timeCheckHandler);
+
+                // 다른 모든 메인 영상을 정지시킵니다.
+                document.querySelectorAll('.main-video-area video').forEach(v => {
+                    if (v !== this && !v.paused) {
+                        v.pause();
+                        // 다른 영상이 정지되면 해당 영상의 timeupdate 리스너도 제거합니다.
+                        if (v.timeCheckHandler) {
+                             v.removeEventListener('timeupdate', v.timeCheckHandler);
+                        }
+                    }
+                });
+            });
+
+            // 2. 영상이 재생 가능한 상태인지 확인하고 시점을 설정합니다.
+            const attemptPlay = () => {
+                if (videoElement.readyState >= 3) { // HAVE_FUTURE_DATA (재생할 준비가 되어있음)
+                    videoElement.currentTime = timeInSeconds;
+                    videoElement.play().catch(e => {
+                        console.warn(`[#${index + 1}] 자동 재생 실패: 브라우저 정책`);
+                    });
+                } else {
+                    // 영상이 아직 준비되지 않았다면 'canplay' 이벤트를 기다립니다.
+                    videoElement.addEventListener('canplay', function handler() {
+                        videoElement.removeEventListener('canplay', handler); // 한 번만 실행되도록 제거
+                        
+                        // 시점 설정
+                        videoElement.currentTime = timeInSeconds;
+                        
+                        // 재생 시도
+                        videoElement.play().catch(e => {
+                            console.warn(`[#${index + 1}] 자동 재생 실패: 브라우저 정책`);
+                        });
+                    }, { once: true });
+                }
+            };
+
+            attemptPlay();
+        }
+        
+        // 템플릿 로드 및 데이터 파싱
+        document.addEventListener('DOMContentLoaded', () => {
+            const feedbackListElement = document.getElementById('feedbackList');
+            const storedFeedback = localStorage.getItem('analysisFeedback');
+            
+            // 1. localStorage에서 비디오 경로를 불러와 전역 변수에 저장합니다.
+            MAIN_VIDEO_SOURCE = localStorage.getItem('mainVideoPath');
+            STEVE_VIDEO_SOURCE = localStorage.getItem('steveVideoPath');
+
+            if (!MAIN_VIDEO_SOURCE) {
+                feedbackListElement.innerHTML = `<p style="color: red;">오류: 메인 영상 파일 경로를 찾을 수 없습니다.</p>`;
+                return;
+            }
+
+            if (storedFeedback) {
+                try {
+                    const feedbackArray = JSON.parse(storedFeedback);
+                    feedbackListElement.innerHTML = '';
+                    
+                    feedbackArray.forEach((item, index) => {
+                        // 데이터 파싱
+                        const text = item.text || '';
+                        const keyword = item.key_word || '';
+                        const advice = item.advice || '제공된 조언이 없습니다.';
+                        const seconds = item.seconds || 0; 
+                        const start_time = item.start || "00:00";
+                        const end_seconds = item.end_seconds || item.seconds + 5; 
+                        const end_time = item.end || "00:00"; 
+
+                        let styledText = text;
+                        if (keyword) {
+                            const regex = new RegExp(`(${keyword})`, 'gi'); 
+                            styledText = text.replace(regex, '<strong>$1</strong>');
+                        }
+
+                        const listItem = document.createElement('div');
+                        listItem.classList.add('feedback-item');
+                        
+                        // ⭐️ HTML 구조 변경: 스티브 영상을 토글 없이 항상 표시
+                        listItem.innerHTML = `
+                            <div class="feedback-content-area">
+                                
+                                <div class="left-section">
+                                    <div class="feedback-header">
+                                        <div class="feedback-number">#${index + 1}</div>
+                    
+                                    </div>
+                                    <div class="main-video-area">
+                                        <video src="${MAIN_VIDEO_SOURCE}" controls muted preload="auto"></video>
+                                        <p>재생 시점 (${start_time} ~ ${end_time})</p>
+                                    </div>
+
+                                    <div class="feedback-text">
+                                        <h3>발언 내용</h3>
+                                        <p class="text-content">${styledText}</p>
+                                    </div>
+                                </div>
+
+
+                                <div class="right-section">
+                                    <div class="feedback-header" style="justify-content: flex-start;">
+                                        <h3 style="margin: 0; color: #007aff;">잡스라면 이렇게 했을 겁니다...</h3>
+                                    </div>
+                                    
+                                    <div class="steve-video-container">
+                                        
+                                        <video src="${STEVE_VIDEO_SOURCE}" controls></video>
+                                    </div>
+                                    
+                                    <div class="feedback-advice">
+                                        <h3>피드백</h3>
+                                        <p class="advice-content">${advice}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        feedbackListElement.appendChild(listItem);
+                        
+                        // 메인 영상 (조정식) 시점 이동 및 재생/정지 제어 시작
+                        const mainVideo = listItem.querySelector('.main-video-area video');
+                        seekAndPlayMainVideo(mainVideo, seconds, end_seconds, index);
+                    });
+
+                } catch (e) {
+                    feedbackListElement.innerHTML = `<p style="color: red;">데이터 처리 오류: 피드백 형식이 올바르지 않습니다. (JSON 파싱 실패)</p>`;
+                    console.error("JSON 파싱 오류:", e);
+                }
+            } else {
+                feedbackListElement.innerHTML = `<p style="color: red;">오류: 피드백 내용을 찾을 수 없습니다.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
