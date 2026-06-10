@@ -4,6 +4,13 @@
 
 발표 영상을 입력하면 제스처, 음성, 텍스트 정보를 함께 분석해 발표 구간별 강조 점수를 예측하는 멀티모달 발표 코칭 AI 프로젝트입니다.
 
+이 프로젝트에서 가장 강조하고 싶은 부분은 **여러 모델 구조를 비교 실험한 뒤, 최종 추론 파이프라인에 가장 적합한 모델 조합을 선택했다는 점**입니다.
+
+## 프로젝트 자료
+
+- [최종 보고서](./A3_최종보고서.pdf)
+- [발표 자료](./project_steve_발표자료.pdf)
+
 ## 프로젝트 개요
 
 발표에서 중요한 내용은 말의 내용만으로 전달되지 않습니다. 손동작이나 몸의 움직임, 목소리의 크기와 높낮이, 문장 자체의 중요도가 함께 작용합니다.
@@ -12,8 +19,21 @@
 
 - 입력: 발표 영상 파일 (`mp4`, `avi`, `mov`, `mkv`)
 - 출력: 구간별 강조 score, 강조 구간 수, 세그먼트별 JSON 결과
-- 핵심 구조: 제스처 모델 + 오디오 모델 + 텍스트 feature + Gated Fusion
+- 핵심 구조: Gesture Model + Audio Model + Text Feature + Gated Fusion
 - 활용 목적: 발표 연습, 발표 피드백, 커뮤니케이션 분석
+
+## 모델 비교 실험
+
+단일 모델을 바로 정해 구현한 것이 아니라, 모달리티별 모델과 Fusion 구조를 나누어 비교했습니다. 실험 노트북은 [`experiments/`](./experiments) 폴더에 정리되어 있습니다.
+
+| 실험 영역 | 비교 대상 | 최종 적용 |
+| --- | --- | --- |
+| Gesture / Visual | R3D-18, MC3-18, R(2+1)D | R3D-18 |
+| Audio | Log-Mel Spectrogram + BiLSTM 기반 음성 패턴 분류 | BiLSTM |
+| Text | KLUE/RoBERTa 기반 1024차원 text feature | Text feature 입력 |
+| Fusion | MLP Fusion, Gated Fusion, Transformer Fusion | Gated Fusion |
+
+최종 Flask 추론 서버에서는 R3D-18 기반 제스처 feature, BiLSTM 기반 오디오 feature, 1024차원 텍스트 feature를 결합하고, Gated Fusion 모델로 구간별 강조 score를 예측합니다.
 
 ## 기술 스택
 
@@ -22,7 +42,7 @@
 - Deep Learning: PyTorch, TorchVision, TorchAudio
 - Video Processing: OpenCV
 - Audio Processing: Librosa
-- Text Feature: KLUE/RoBERTa 기반 1024차원 feature 실험
+- Text Feature: KLUE/RoBERTa 기반 feature 실험
 - ML Utilities: NumPy, Scikit-learn
 
 ## 주요 기능
@@ -53,7 +73,7 @@ R3D-18 기반 3D CNN을 사용해 발표자의 손동작, 몸짓, 상반신 움�
 
 텍스트 파트는 `klue/roberta-large` 기반 1024차원 feature를 Fusion 입력으로 사용하는 구조입니다.
 
-현재 Flask API에서는 업로드 영상마다 STT를 새로 수행하지 않고, `Code/total_tensor.pt`가 있으면 해당 tensor를 사용합니다. 파일이 없을 경우에는 zero vector로 대체해 추론 흐름이 끊기지 않도록 처리했습니다.
+현재 Flask API에서는 `Code/total_tensor.pt`가 있으면 해당 tensor를 사용합니다. 파일이 없을 경우에는 zero vector로 대체해 추론 흐름이 끊기지 않도록 처리했습니다.
 
 ### 5. 멀티모달 Fusion
 
@@ -78,14 +98,17 @@ Project_Steveddarajabs
 │   │   ├── datasets.py
 │   │   ├── helpers.py
 │   │   └── models.py
-│   ├── outputs
-│   └── experiments
+│   └── outputs
+├── experiments
+│   ├── model_comparison
+│   └── training_pipeline
 ├── stt_results
-├── README.md
-├── PROJECT_SUMMARY_KO.md
-├── requirements.txt
 ├── A3_최종보고서.pdf
-└── project_steve_발표자료.pdf
+├── project_steve_발표자료.pdf
+├── PROJECT_SUMMARY_KO.md
+├── README.md
+├── LICENSE
+└── requirements.txt
 ```
 
 ## 주요 파일 설명
@@ -95,12 +118,8 @@ Project_Steveddarajabs
 - `Code/utils/models.py`: Gesture, Audio, Text, Fusion 모델 정의
 - `Code/utils/datasets.py`: 영상, 오디오, 텍스트, Fusion Dataset 정의
 - `Code/utils/helpers.py`: 데이터 준비, 학습/평가, 추론, 후처리 유틸리티
-- `Code/01_gesture_labeling_tool.ipynb`: 제스처 라벨링 도구
-- `Code/02_train_gesture.ipynb`: 제스처 모델 학습
-- `Code/03_train_audio_real.ipynb`: 오디오 모델 학습
-- `Code/04_make_text.ipynb`: 텍스트 feature 생성 실험
-- `Code/05_train_Gated.ipynb`: Gated Fusion 모델 학습
-- `Code/06_Main_inference_model_binary.ipynb`: 통합 추론 실험
+- `experiments/training_pipeline/`: 라벨링, 학습, feature 생성, 통합 추론 실험
+- `experiments/model_comparison/`: Gesture/Fusion 모델 비교 실험
 
 ## 실행 방법
 
@@ -163,12 +182,15 @@ http://localhost:5000
 
 이 프로젝트는 발표 영상을 단일 입력으로 받아 시각, 음성, 텍스트 정보를 함께 분석하는 멀티모달 발표 분석 시스템입니다.
 
-제스처 분석에는 R3D-18 기반 3D CNN을 사용했고, 음성 분석에는 Log-Mel Spectrogram 기반 BiLSTM을 사용했습니다. 텍스트는 1024차원 feature로 변환해 Fusion 입력에 포함했습니다. 세 모달리티에서 추출한 feature를 Gated Fusion 구조로 결합해 최종 강조 점수를 예측하고, 결과를 JSON 형태로 반환하도록 Flask API까지 연결했습니다.
+제스처 분석에는 여러 3D CNN 계열 모델을 비교한 뒤 R3D-18을 적용했고, 음성 분석에는 Log-Mel Spectrogram 기반 BiLSTM을 사용했습니다. Fusion 단계에서는 MLP, Gated Fusion, Transformer Fusion을 비교하고, 최종 추론 서버에는 Gated Fusion을 적용했습니다.
+
+즉, 단순히 하나의 모델을 구현한 프로젝트가 아니라 **여러 후보 모델을 실험하고 비교하면서 최종 구조를 선택한 프로젝트**입니다.
 
 ## 면접 설명 포인트
 
 - 단순 영상 분류가 아니라 시각, 음성, 언어 정보를 결합한 멀티모달 구조를 설계했습니다.
+- R3D-18, MC3-18, R(2+1)D 등 제스처 모델 후보를 비교했습니다.
+- MLP Fusion, Gated Fusion, Transformer Fusion을 비교하고 최종적으로 Gated Fusion을 선택했습니다.
 - 각 모달리티를 독립적으로 처리한 뒤 feature-level late fusion으로 통합했습니다.
-- Gated Fusion을 사용해 모달리티별 feature를 하나의 강조 score로 결합했습니다.
 - 영상/오디오 세그먼트 분할, feature 추출, 모델 추론, JSON 반환까지 이어지는 추론 파이프라인을 구성했습니다.
-- 학습 노트북과 Flask 추론 서버를 분리해 실험 코드와 실행 코드를 함께 관리했습니다.
+- 학습/실험 노트북과 Flask 추론 서버를 분리해 실험 과정과 실행 코드를 함께 관리했습니다.
